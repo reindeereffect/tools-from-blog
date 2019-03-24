@@ -1,12 +1,25 @@
 #! /usr/bin/env python3
 
 import re
+import sys
+import json
+
+################################################################################
 
 # Time spent on a nice printable representation of complex data structures 
 # repays itself at debugging time.
 
 def indent(s, tab='    '): return tab + s.replace('\n', '\n' + tab)
 
+def todict(sym):
+    if type(sym) == list:
+        return list(map(todict, sym))
+        return dict(type='', value=list(map(todict, sym)))
+    elif sym.terminal:
+        return dict(type=sym.type, value=sym.value)
+    else:
+        return dict(type=sym.type, value=list(map(todict, sym.value)))
+    
 class symbol:
     def __init__(self, type_, value):
         self.type = type_
@@ -26,6 +39,9 @@ class symbol:
         if not self.terminal: return iter(self.value)
         else: return iter(())
 
+    def todict(self):
+        return todict(self)
+        
 class parse_result(tuple):
     def __repr__(self):
         return '''
@@ -38,6 +54,9 @@ class parse_result(tuple):
         %s
         '''.replace('''
         ''', '\n') % self
+
+################################################################################
+# backtracking combinators
 
 def alt(*ps):
     def parse(s):
@@ -56,6 +75,19 @@ def seq(*ps):
                 else: yield [first], rest
     return parse
 
+def rep(p):
+    def parse(s):
+        stack = [([], s)]
+        while stack:
+            path, s = stack.pop(-1)
+            yield path, s
+            for x, rest in p(s):
+                if len(rest) < len(s): # EPSILON can cause infinite loopiness
+                    stack.append((path + [x], rest))
+    return parse
+
+
+def opt(p): return alt(p, EPSILON)
 
 def literal(spec, s):
     spec = spec.strip()
@@ -82,6 +114,7 @@ class parser:
 @parser
 def EPSILON(s): yield '', s
 
+################################################################################
 
 def parses(start, s):
     for x in start(s):
@@ -91,19 +124,6 @@ def parses(start, s):
 
 def parse(start, s): return next(parses(start, s))
 
-def rep(p):
-    def parse(s):
-        stack = [([], s)]
-        while stack:
-            path, s = stack.pop(-1)
-            yield path, s
-            for x, rest in p(s):
-                if len(rest) < len(s): # EPSILON can cause infinite loopiness
-                    stack.append((path + [x], rest))
-    return parse
-
-
-def opt(p): return alt(p, EPSILON)
 
 def skip_comment(s):
     s2 = re.sub('^#[^\n]*', '', s.lstrip()).lstrip()
@@ -258,7 +278,10 @@ class Parser:
                     
     def __call__(self, s):
         return parse(self.symbols[self.start], s)
-    
+
+    def parses(self, s, full=True):
+        return self(s) if full else self.symbols[self.start](s)
+        
     #### handlers
     
     def h_enclosed(self, _, body, __): return body.result
@@ -328,4 +351,27 @@ class evaluator:
             return fn
         return deco
     
+################################################################################
 
+if __name__ == '__main__':
+    JSON = False
+    if '-j' in sys.argv:
+        JSON = True
+        del sys.argv[sys.argv.index('-j')]
+        
+    _, start, grammarfn = sys.argv
+    grammar = open(grammarfn).read()
+    text = sys.stdin.read()
+    P = Parser(start, grammar)
+    try:
+        sym = P(text)
+        if JSON: print(json.dumps(sym.todict()))
+        else: print(sym)
+    except StopIteration:
+        ps = Parser(start, grammar).parses(text, full=False)
+        sym = min((len(p[1]), p) for p in ps)[1]
+
+        if JSON:
+            sys.stderr.write(json.dumps(dict(parsed=sym[0].todict(),
+                                             unconsumed=sym[1])))
+        else: sys.stderr.write(repr(sym))
