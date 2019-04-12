@@ -27,7 +27,7 @@ class symbol:
         self.terminal = type(self.value) != list
             
     def __repr__(self):
-        if self.terminal: return f"{self.type}: '{self.value}'"
+        if self.terminal: return '%s: %s' % (self.type, self.value)
         else:
             header = self.type + ':'
             body = '\n'.join(map(repr, self.value))
