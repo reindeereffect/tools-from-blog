@@ -1,0 +1,31 @@
+#! /home/kmstout/dev/blog-tools/yakety/yakety/__init__.py expression
+
+! ignore /[ \n\t]+/
+! ignore /\/\/.*\n/
+
+################################################################################
+# terminals
+
+NUMBER  : /[0-9]+/
+VARIABLE: /[a-zA-Z_][0-9a-zA-Z_]*/
+LPAREN  : '('
+RPAREN  : ')'
+ADDOP   : /[+-]/
+MULOP   : /[*\/%]/
+EXP	: '^'
+
+
+################################################################################
+# nonterminals
+
+enclosed  : LPAREN expression RPAREN
+factor    : (NUMBER | VARIABLE | enclosed) [EXP factor]
+term      : factor {MULOP factor}
+
+
+################################################################################
+# start
+
+expression: term {ADDOP term}
+
+#teti
