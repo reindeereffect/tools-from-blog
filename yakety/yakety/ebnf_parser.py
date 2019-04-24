@@ -120,8 +120,18 @@ def reference(s):
 
 @parser
 def directive(s):
-    'directive : EXCLAMATION IGNORE REGEX'
-    return seq(EXCLAMATION, IGNORE, REGEX)(s)
+    'directive : EXCLAMATION (ignore_directive | start_directive)'
+    return seq(EXCLAMATION, alt(ignore_directive, start_directive))(s)
+
+@parser
+def ignore_directive(s):
+    'ignore_directive : IGNORE REGEX'
+    return seq(IGNORE, REGEX)(s)
+
+@parser
+def start_directive(s):
+    'start_directive : START IDENTIFIER'
+    return seq(START, IDENTIFIER)(s)
 
 @parser
 def EXCLAMATION(s):
@@ -130,6 +140,10 @@ def EXCLAMATION(s):
 @parser
 def IGNORE(s):
     return literal2('ignore', s)
+
+@parser
+def START(s):
+    return literal2('start', s)
 
 @parser
 def directives(s):

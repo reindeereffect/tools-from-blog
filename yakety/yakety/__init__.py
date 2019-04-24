@@ -49,8 +49,7 @@ def parserize(parsefn):
 ## the parser generator
 
 class Parser:
-    def __init__(self, start, grammar, **symbols):
-        self.start   = start
+    def __init__(self, grammar, **symbols):
         self.grammar = grammar
         self.symbols = symbols
         self.ignore = set()
@@ -118,11 +117,14 @@ class Parser:
         parsefn = parserize(prods.result)
         parsefn.f.__name__ = name = name_.value
         self.symbols[name] = parsefn
+        if not hasattr(self, 'start'):
+            self.start = name
 
-    def h_directive(self, _, cmd, *args):
-        if cmd.value == 'ignore':
-            self.ignore |= {arg.value[1:-1] for arg in args}
+    def h_ignore_directive(self, _, *args):
+        self.ignore |= {arg.value[1:-1] for arg in args}
 
+    def h_start_directive(self, _, start):
+        self.start = start.value
 
     
 ################################################################################
@@ -133,12 +135,11 @@ if __name__ == '__main__':
         JSON = True
         del sys.argv[sys.argv.index('-j')]
         
-    _, start, grammarfn = sys.argv
+    _, grammarfn = sys.argv
     grammar = open(grammarfn).read()
-    
     text = sys.stdin.read()
-    P = Parser(start, grammar)
-
+    P = Parser(grammar)
+    
     try:
         sym = P(text)
         if JSON: print(json.dumps(sym.todict()))

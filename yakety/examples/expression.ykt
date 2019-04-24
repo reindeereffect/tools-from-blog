@@ -1,7 +1,11 @@
-#! /home/kmstout/dev/blog-tools/yakety/yakety/__init__.py expression
+#! /usr/bin/env ykt expression
 
 ! ignore /[ \n\t]+/
 ! ignore /\/\/.*\n/
+
+! start expression	# not strictly necessary
+
+expression: term {ADDOP term}
 
 ################################################################################
 # terminals
@@ -26,6 +30,6 @@ term      : factor {MULOP factor}
 ################################################################################
 # start
 
-expression: term {ADDOP term}
+
 
 #teti
