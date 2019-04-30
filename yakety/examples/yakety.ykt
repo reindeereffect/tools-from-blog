@@ -1,0 +1,33 @@
+#! /usr/bin/env ykt
+
+!start ebnf
+!ignore /[ \t\r\n]+/
+!ignore /#[^\n]*/
+
+ebnf             : directives rules
+directives       : {directive}
+directive        : '!' (ignore_directive | start_directive)
+ignore_directive : 'ignore' REGEX
+start_directive  : 'start' IDENTIFIER
+rules            : {rule}
+rule             : IDENTIFIER ':' productions
+productions      : production {'|' production}
+production       : {substitution}
+
+substitution     : repeated 
+                 | optional 
+                 | enclosed 
+                 | reference 
+                 | STRING_LITERAL 
+                 | REGEX
+		 
+enclosed         : '(' productions ')'
+repeated         : '{' productions '}'
+optional         : '[' productions ']'
+
+reference        : IDENTIFIER
+
+STRING_LITERAL   : /'(\.|[^'])*'/
+REGEX : /\x2f(\\.|[^\x2f])+\x2f/	# ord('/') == 0x2f	
+
+IDENTIFIER       : /[a-zA-Z_][a-zA-Z0-9_]*/

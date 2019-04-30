@@ -1,4 +1,4 @@
-#! /usr/bin/env ykt expression
+#! /usr/bin/env ykt
 
 ! ignore /[ \n\t]+/
 ! ignore /\/\/.*\n/
@@ -25,11 +25,3 @@ EXP	: '^'
 enclosed  : LPAREN expression RPAREN
 factor    : (NUMBER | VARIABLE | enclosed) [EXP factor]
 term      : factor {MULOP factor}
-
-
-################################################################################
-# start
-
-
-
-#teti

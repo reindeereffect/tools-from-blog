@@ -1,9 +1,42 @@
 #! /usr/bin/env python3
+'''
+Yakety is a simple Extended Backus-Nauer Form (EBNF) recursive descent parser
+generator.
 
-from ebnf_parser import *
+A language specification consists of rules and directives:
 
-import sys
+  ebnf             : directives rules
+
+where directives (purely optional) are introduced by '!' and may be either
+start or ignore directives:
+
+  directives       : {directive}
+  directive        : '!' (ignore_directive | start_directive)
+  ignore_directive : 'ignore' REGEX
+  start_directive  : 'start' IDENTIFIER
+
+A start directive indicates start symbol for the grammar; if not specified, it
+will be the first nonterminal encountered. An ignore directive indicates what
+character sequences to skip when scanning for terminals.
+
+The remainder of Yakety's notation is fairly conventional EBNF, both described
+and demonstrated here:
+
+  rules            : {rule}
+  rule             : IDENTIFIER ':' productions
+  productions      : production {'|' production}
+  production       : {substitution}
+  enclosed         : '(' productions ')'
+  repeated         : '{' productions '}'
+  optional         : '[' productions ']'
+  reference        : IDENTIFIER
+  IDENTIFIER       : /[a-zA-Z_][a-zA-Z0-9_]*/
+'''
+
 import json
+import sys
+
+from .ebnf_parser import *
 
 ################################################################################
 
@@ -77,19 +110,18 @@ class Parser:
         if not enclosure(sym): self.handle(sym)
                     
     def __call__(self, s):
-        try:
-            return next(self.parses(s))[0]
-        except StopIteration:
-            raise SyntaxError(skip_ignores(self.ignore, s))
-
-    def parses(self, s, full=True):
         s = skip_ignores(self.ignore, s)
         if s:
+            n, pr0 = len(s), None
             for x in self.symbols[self.start](s):
-                p, rest = x
-                if not full: yield x
-                elif not skip_ignores(self.ignore, rest): yield x
+                pr = p, rest = x
+                rest = skip_ignores(self.ignore, rest)
+                if not rest:
+                    return p
+                elif len(rest) < n:
+                    n, pr0 = len(rest), pr
 
+            raise SyntaxError(pr0)
                 
     #### handlers
     
@@ -126,30 +158,4 @@ class Parser:
     def h_start_directive(self, _, start):
         self.start = start.value
 
-    
 ################################################################################
-        
-if __name__ == '__main__':
-    JSON = False
-    if '-j' in sys.argv:
-        JSON = True
-        del sys.argv[sys.argv.index('-j')]
-        
-    _, grammarfn = sys.argv
-    grammar = open(grammarfn).read()
-    text = sys.stdin.read()
-    P = Parser(grammar)
-    
-    try:
-        sym = P(text)
-        if JSON: print(json.dumps(sym.todict()))
-        else: print(sym)
-    except SyntaxError as e:
-        if e.args[0]:
-            ps = P.parses(text, full=False)
-            sym = min((len(p[1]), p) for p in ps)[1]
-            
-            if JSON:
-                sys.stderr.write(json.dumps(dict(parsed=sym[0].todict(),
-                                                 unconsumed=sym[1])))
-            else: sys.stderr.write(repr(sym))

@@ -1,6 +1,8 @@
 #! /usr/bin/env python3
 
-from parsing_base import *
+import re
+
+from .parsing_base import *
 
 def skip_comment(s):
     s2 = re.sub('^#[^\n]*', '', s.lstrip()).lstrip()
@@ -33,8 +35,8 @@ def STRING_LITERAL(s):
     return match2(r"\'(\\.|[^\\'])*\'", s)
 
 @parser
-def REGEX(s): return match2(r'/(\\.|[^\\/])+/', s)
-
+def REGEX(s):
+    return match2(r'/(\\.|[^\\/])+/', s)
 
 @parser
 def LBRACE(s): return literal2('{', s)

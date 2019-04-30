@@ -1,0 +1,39 @@
+#! /usr/bin/env python3
+
+import argparse
+import json
+import sys
+
+import yakety as ykt
+
+def main(grammarfn, JSON=False):
+    grammar = open(grammarfn).read()
+    text = sys.stdin.read()
+    P = ykt.Parser(grammar)
+    
+    try:
+        sym = P(text)
+        if JSON: print(json.dumps(sym.todict()))
+        else: print(sym)
+    except SyntaxError as e:
+        pr = sym, rest = e.args[0]
+        if JSON:
+            sys.stderr.write(json.dumps(dict(parsed=sym.todict(),
+                                             unconsumed=rest)))
+        else:
+            sys.stderr.write(repr(pr))
+
+################################################################################
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog=ykt.__doc__,
+        description=
+        'Use an EBNF grammar to parse STDIN, sending the parse tree to STDOUT.')
+    parser.add_argument('-j', '--json',
+                        action='store_true',
+                        help='emit JSON')
+    parser.add_argument('grammar', help='EBNF grammar file')
+    args = parser.parse_args()
+    main(args.grammar, args.json)

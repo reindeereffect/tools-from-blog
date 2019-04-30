@@ -3,3 +3,6 @@
 \#*\#
 err
 log
+build/
+dist/
+*.egg-info
