@@ -1,36 +1,8 @@
 #! /usr/bin/env python3
 '''
 Yakety is a simple Extended Backus-Nauer Form (EBNF) recursive descent parser
-generator.
-
-A language specification consists of rules and directives:
-
-  ebnf             : directives rules
-
-where directives (purely optional) are introduced by '!' and may be either
-start or ignore directives:
-
-  directives       : {directive}
-  directive        : '!' (ignore_directive | start_directive)
-  ignore_directive : 'ignore' REGEX
-  start_directive  : 'start' IDENTIFIER
-
-A start directive indicates start symbol for the grammar; if not specified, it
-will be the first nonterminal encountered. An ignore directive indicates what
-character sequences to skip when scanning for terminals.
-
-The remainder of Yakety's notation is fairly conventional EBNF, both described
-and demonstrated here:
-
-  rules            : {rule}
-  rule             : IDENTIFIER ':' productions
-  productions      : production {'|' production}
-  production       : {substitution}
-  enclosed         : '(' productions ')'
-  repeated         : '{' productions '}'
-  optional         : '[' productions ']'
-  reference        : IDENTIFIER
-  IDENTIFIER       : /[a-zA-Z_][a-zA-Z0-9_]*/
+generator. Its specification language is described in yakety.ykt, in the examples
+directory of this distribution.
 '''
 
 import json
@@ -122,7 +94,7 @@ class Parser:
                     n, pr0 = len(rest), pr
 
             raise SyntaxError(pr0)
-                
+
     #### handlers
     
     def h_enclosed(self, _, body, __): return body.result

@@ -9,8 +9,18 @@ import yakety as ykt
 def main(grammarfn, JSON=False):
     grammar = open(grammarfn).read()
     text = sys.stdin.read()
-    P = ykt.Parser(grammar)
-    
+    try:
+        P = ykt.Parser(grammar)
+    except StopIteration:
+        n0, att0 = float('inf'), None
+        for attempt in ykt.ebnf_parser.ebnf(grammar):
+            n = len(attempt[1])
+            if n < n0:
+                n0, att0 = n, attempt
+        sys.stderr.write('Invalid language specification\n\n')
+        sys.stderr.write('%s\n' % repr(att0))
+        exit()
+
     try:
         sym = P(text)
         if JSON: print(json.dumps(sym.todict()))

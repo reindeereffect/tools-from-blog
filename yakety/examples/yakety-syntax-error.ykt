@@ -1,5 +1,8 @@
 #! /usr/bin/env ykt
 
+# This file is nearly like yackety.ykt, except it contains this comment and a
+# syntax error.
+
 # The following describes Yakety's language specification language, and can be
 # used to generate a parser that will parse such specifications.
 
@@ -14,7 +17,7 @@
 ebnf             : directives rules
 
 # Directives are prefixed by a '!'; recognized directives are 'ignore' and
-# 'start':
+'start':
 
 directives       : {directive}
 directive        : '!' (ignore_directive | start_directive)
