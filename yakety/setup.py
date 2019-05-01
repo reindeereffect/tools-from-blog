@@ -8,7 +8,7 @@ setup(name='yakety',
       url='https://github.com/reindeereffect/blog-tools/tree/master/yakety',
       author='Kevin M. Stout',
       packages=['yakety'],
-      scripts=['bin/ykt'],
+      scripts=['bin/ykt', 'bin/dotify'],
       zip_safe=False)
 
 
