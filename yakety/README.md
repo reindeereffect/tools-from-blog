@@ -7,7 +7,7 @@ also discusses its principles of operation.
 Included are:
 
 * yakety: a Python module for generating parsers from grammars
-* yakety.evaluator: provides a postfix evaluator for parse trees, with a simple
+* yakety.evaluator: provides an evaluator for parse trees, with a simple
 interface for registering symbol handlers
 * bin/ykt: a command line wrapper for yakety, allowing easy creation of parsers
 that emit parse trees to stdout (optionally in JSON)
