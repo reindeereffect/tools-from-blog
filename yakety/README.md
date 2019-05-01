@@ -13,6 +13,8 @@ interface for registering symbol handlers
 that emit parse trees to stdout (optionally in JSON)
 * bin/dotify: a tool for converting JSON-formatted parse trees produced by
 ykt parsers to Graphviz dot syntax
+* a collection of examples, including an implementation of FizzBuzz and a 
+grammar for Yakety itself
 
 N.B.: dotify is actually derived from library used to produce the parse tree
 diagrams in the referenced article. None of its code actually appears in the
