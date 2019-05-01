@@ -1,7 +1,7 @@
 # Yakety
 
 Yakety is a recursive descent parser generator for EBNF grammars. It is based
-on the code from the article[Recursive Descent: The Next Iteration](https://reindeereffect.github.io/2019/01/16/recursive-descent-part2/), which
+on the code from the article [Recursive Descent: The Next Iteration](https://reindeereffect.github.io/2019/01/16/recursive-descent-part2/), which
 also discusses its principles of operation.
 
 Included are:
