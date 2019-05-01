@@ -8,7 +8,7 @@ import yakety as ykt
 
 def main(grammarfn, JSON=False):
     grammar = open(grammarfn).read()
-    text = sys.stdin.read()
+
     try:
         P = ykt.Parser(grammar)
     except StopIteration:
@@ -20,7 +20,7 @@ def main(grammarfn, JSON=False):
         sys.stderr.write('Invalid language specification\n\n')
         sys.stderr.write('%s\n' % repr(att0))
         exit()
-
+    text = sys.stdin.read()
     try:
         sym = P(text)
         if JSON: print(json.dumps(sym.todict()))
